@@ -40,7 +40,7 @@ def main():
                     sep_mask = np.array(Image.open(path).convert('P')) #=模式“P”为8位彩色图像，它的每个像素用8个bit表示，其对应的彩色值是按照调色板查询出来的。 这样占空空间小一点.
                     # print(np.unique(sep_mask))
 
-                    mask[sep_mask == 225] = l
+                    mask[sep_mask == 225] = l #注意看这里是l不是1, 是L的小写. 是att的索引. 所以我们的mask最后得到的效果是. 图像中skin都是亮度1,.........hat亮度18.  enumerate(atts, 1) 注意索引从0开始. 然后background就是默认的0了!!!!!!
             cv2.imwrite('{}/{}.png'.format(mask_path, j), mask)
             print(j)
             if counter>100:  #===========因为我们只做测试,所以只测100个图片够了.其实只有8个图片. 100个特征小图.

@@ -23,8 +23,9 @@ class FaceMask(Dataset):
         self.mode = mode
         self.ignore_lb = 255
         self.rootpth = rootpth
-
+        #======我们只测试前8张.
         self.imgs = os.listdir(os.path.join(self.rootpth, 'CelebA-HQ-img'))
+        self.imgs = [i.replace('png','jpg') for i in os.listdir('mask')]
 
         #  pre-processing
         self.to_tensor = transforms.Compose([
@@ -44,8 +45,8 @@ class FaceMask(Dataset):
     def __getitem__(self, idx):
         impth = self.imgs[idx]
         img = Image.open(osp.join(self.rootpth, 'CelebA-HQ-img', impth))
-        img = img.resize((512, 512), Image.BILINEAR)
-        label = Image.open(osp.join(self.rootpth, 'mask', impth[:-3]+'png')).convert('P')
+        img = img.resize((512, 512), Image.BILINEAR) # 因为我们mask的图片是512的.
+        label = Image.open(osp.join( 'mask', impth[:-3]+'png')).convert('P')
         # print(np.unique(np.array(label)))
         if self.mode == 'train':
             im_lb = dict(im=img, lb=label)

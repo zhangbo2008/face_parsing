@@ -56,8 +56,8 @@ def train():
 
     # dataset
     n_classes = 19
-    n_img_per_gpu = 16
-    n_workers = 8
+    n_img_per_gpu = 2
+    n_workers = 0  # windows只能单进程.
     cropsize = [448, 448]
     data_root = 'D:/CelebAMask-HQ/'
 
@@ -74,12 +74,12 @@ def train():
     # model
     ignore_idx = -100
     net = BiSeNet(n_classes=n_classes) # 参考1.py 是一个18类别,加上背景就是一个19分类的任务. 
-    net.cuda()
+    # net.cuda()
     net.train()
-    net = nn.parallel.DistributedDataParallel(net,
-            device_ids = [args.local_rank, ],
-            output_device = args.local_rank
-            )
+    # net = nn.parallel.DistributedDataParallel(net,
+    #         device_ids = [args.local_rank, ],
+    #         output_device = args.local_rank
+    #         )
     score_thres = 0.7
     n_min = n_img_per_gpu * cropsize[0] * cropsize[1]//16
     LossP = OhemCELoss(thresh=score_thres, n_min=n_min, ignore_lb=ignore_idx)
@@ -95,7 +95,7 @@ def train():
     warmup_steps = 1000
     warmup_start_lr = 1e-5
     optim = Optimizer(
-            model = net.module,
+            model = net,
             lr0 = lr_start,
             momentum = momentum,
             wd = weight_decay,
@@ -117,16 +117,16 @@ def train():
                 raise StopIteration
         except StopIteration:
             epoch += 1
-            sampler.set_epoch(epoch)
+            # sampler.set_epoch(epoch)
             diter = iter(dl)
             im, lb = next(diter)
-        im = im.cuda()
-        lb = lb.cuda()
+        im = im
+        lb = lb
         H, W = im.size()[2:]
         lb = torch.squeeze(lb, 1)
 
         optim.zero_grad()
-        out, out16, out32 = net(im)
+        out, out16, out32 = net(im) #生成3个图.
         lossp = LossP(out, lb)
         loss2 = Loss2(out16, lb)
         loss3 = Loss3(out32, lb)
@@ -179,3 +179,5 @@ def train():
 
 if __name__ == "__main__":
     train()
+
+#======整体项目很简单, 就是老的图像语义分割模型!!!!!!!!!!目前没哟权重, 等配上权重的推理代码再更新

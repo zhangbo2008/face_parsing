@@ -12,7 +12,7 @@ import numpy as np
 class OhemCELoss(nn.Module):
     def __init__(self, thresh, n_min, ignore_lb=255, *args, **kwargs):
         super(OhemCELoss, self).__init__()
-        self.thresh = -torch.log(torch.tensor(thresh, dtype=torch.float)).cuda()
+        self.thresh = -torch.log(torch.tensor(thresh, dtype=torch.float))
         self.n_min = n_min
         self.ignore_lb = ignore_lb
         self.criteria = nn.CrossEntropyLoss(ignore_index=ignore_lb, reduction='none')
@@ -20,9 +20,9 @@ class OhemCELoss(nn.Module):
     def forward(self, logits, labels):
         N, C, H, W = logits.size()
         loss = self.criteria(logits, labels).view(-1)
-        loss, _ = torch.sort(loss, descending=True)
+        loss, _ = torch.sort(loss, descending=True) # loss排序,
         if loss[self.n_min] > self.thresh:
-            loss = loss[loss>self.thresh]
+            loss = loss[loss>self.thresh] # 只找那些loss大的部分进行学习.
         else:
             loss = loss[:self.n_min]
         return torch.mean(loss)
@@ -50,12 +50,12 @@ if __name__ == '__main__':
     net1 = nn.Sequential(
         nn.Conv2d(3, 19, kernel_size=3, stride=2, padding=1),
     )
-    net1.cuda()
+    net1
     net1.train()
     net2 = nn.Sequential(
         nn.Conv2d(3, 19, kernel_size=3, stride=2, padding=1),
     )
-    net2.cuda()
+    net2
     net2.train()
 
     with torch.no_grad():

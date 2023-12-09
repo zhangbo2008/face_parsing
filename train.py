@@ -72,7 +72,7 @@ def train():
     # model
     ignore_idx = -100
     net = BiSeNet(n_classes=n_classes)
-    net.cuda()
+    net
     net.train()
     net = nn.parallel.DistributedDataParallel(net,
             device_ids = [args.local_rank, ],
@@ -118,8 +118,7 @@ def train():
             sampler.set_epoch(epoch)
             diter = iter(dl)
             im, lb = next(diter)
-        im = im.cuda()
-        lb = lb.cuda()
+
         H, W = im.size()[2:]
         lb = torch.squeeze(lb, 1)
 
